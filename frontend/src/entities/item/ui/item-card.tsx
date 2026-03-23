@@ -1,4 +1,4 @@
-import { Card, CardActionArea, CardContent, Chip, Stack, Typography } from '@mui/material';
+import { Box, Card, CardActionArea, CardContent, Chip, Stack, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import type { ItemListCard } from '@/entities/item/model/types';
@@ -23,6 +23,7 @@ export const ItemCard = ({ item, layout }: Props) => (
       border: theme => `1px solid ${theme.palette.divider}`,
       display: 'flex',
       flexDirection: layout === 'list' ? 'row' : 'column',
+      height: '100%',
       overflow: 'hidden',
     }}
   >
@@ -32,6 +33,7 @@ export const ItemCard = ({ item, layout }: Props) => (
         alignItems: 'stretch',
         display: 'flex',
         flexDirection: layout === 'list' ? 'row' : 'column',
+        height: '100%',
         justifyContent: 'stretch',
         width: '100%',
       }}
@@ -46,27 +48,43 @@ export const ItemCard = ({ item, layout }: Props) => (
           minWidth: layout === 'list' ? 152 : '100%',
         }}
       >
-        <MuiImagePlaceholder
-          iconSize={layout === 'list' ? 44 : 48}
-          label="Превью объявления"
-        />
+        <MuiImagePlaceholder iconSize={layout === 'list' ? 44 : 48} label="Превью объявления" />
       </Stack>
-      <CardContent sx={{ flexGrow: 1, p: 1.25, '&:last-child': { pb: 1.25 } }}>
-        <Stack spacing={0.75}>
+
+      <CardContent sx={{ display: 'flex', flexGrow: 1, p: 1.25, '&:last-child': { pb: 1.25 } }}>
+        <Stack spacing={0.75} sx={{ height: '100%', width: '100%' }}>
           <Chip label={categoryLabel[item.category]} size="small" sx={{ width: 'fit-content' }} />
-          <Typography lineHeight={1.25} variant="body2">
+
+          <Typography
+            lineHeight={1.25}
+            variant="body2"
+            sx={
+              layout === 'grid'
+                ? {
+                    display: '-webkit-box',
+                    minHeight: '2.5em',
+                    overflow: 'hidden',
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: 2,
+                  }
+                : undefined
+            }
+          >
             {item.title}
           </Typography>
+
           <Typography fontWeight={700} variant="body2">
             {formatPrice(item.price)}
           </Typography>
-          {item.needsRevision ? (
-            <Chip
-              color="warning"
-              label={
-                <Stack alignItems="center" direction="row" spacing={0.75}>
-                  <span
-                    style={{
+
+          <Box sx={{ minHeight: 24, mt: 'auto', pt: 0.25 }}>
+            {item.needsRevision ? (
+              <Chip
+                color="warning"
+                icon={
+                  <Box
+                    component="span"
+                    sx={{
                       backgroundColor: 'currentColor',
                       borderRadius: '50%',
                       display: 'inline-block',
@@ -74,14 +92,26 @@ export const ItemCard = ({ item, layout }: Props) => (
                       width: 6,
                     }}
                   />
-                  <span>Требует доработок</span>
-                </Stack>
-              }
-              size="small"
-              variant="outlined"
-              sx={{ width: 'fit-content' }}
-            />
-          ) : null}
+                }
+                label="Требует доработок"
+                size="small"
+                variant="outlined"
+                sx={{
+                  width: 'fit-content',
+                  '& .MuiChip-icon': {
+                    ml: 0.75,
+                    mr: -0.25,
+                  },
+                  '& .MuiChip-label': {
+                    alignItems: 'center',
+                    display: 'flex',
+                    lineHeight: 1.2,
+                    py: 0.1,
+                  },
+                }}
+              />
+            ) : null}
+          </Box>
         </Stack>
       </CardContent>
     </CardActionArea>
