@@ -106,6 +106,54 @@ npm run dev
 
 `http://localhost:5173`
 
+## Запуск через Docker Compose
+
+В проекте есть возможность поднять клиент и сервер одной командой через `docker compose`.
+
+### Что нужно
+
+- установленный Docker Desktop
+- доступные команды `docker` и `docker compose`
+
+### Подготовка
+
+В корне проекта можно создать `.env` для `docker compose`, если хотите передать AI-настройки в сборку фронтенда:
+
+```env
+VITE_OPENROUTER_API_KEY=
+VITE_OPENROUTER_MODEL=openai/gpt-4o-mini
+VITE_LLM_PROXY_URL=
+```
+
+Если AI не нужен, можно оставить ключ пустым.
+
+### Запуск
+
+Из корня проекта:
+
+```powershell
+docker compose up --build
+```
+
+После запуска:
+
+- frontend будет доступен на `http://localhost:3000`
+- server будет доступен на `http://localhost:8080`
+
+### Остановка
+
+```powershell
+docker compose down
+```
+
+### Что проверить после запуска
+
+- открывается `http://localhost:3000`
+- загружается список объявлений
+- работают переходы по страницам
+- обновление страницы на маршрутах вроде `/ads`, `/ads/1`, `/ads/1/edit` не даёт `404`
+- редактирование объявлений и сохранение работают
+
 ## Настройка AI
 
 Сейчас AI во фронтенде работает через OpenRouter.
