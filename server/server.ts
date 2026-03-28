@@ -43,6 +43,67 @@ interface ItemGetRequest extends Fastify.RequestGenericInterface {
   };
 }
 
+
+
+// ---------- LLM PROXY ----------
+fastify.post('/llm', async (request, reply) => {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  const defaultModel = process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini';
+
+  if (!apiKey) {
+    reply.status(500).send({ error: 'OPENROUTER_API_KEY is not set' });
+    return;
+  }
+
+  const body = request.body as {
+    messages?: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+    model?: string;
+    maxTokens?: number;
+    plugins?: Array<{ id: string; max_results?: number }>;
+  };
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: body.model || defaultModel,
+        messages: body.messages || [],
+        max_tokens: body.maxTokens ?? 220,
+        plugins: body.plugins,
+      }),
+    });
+
+    const data = await response.json() as {
+      choices?: Array<{ message?: { content?: string } }>;
+      error?: { message?: string };
+    };
+
+    if (!response.ok) {
+      reply.status(response.status).send(data);
+      return;
+    }
+
+    const text = data.choices?.[0]?.message?.content?.trim();
+
+    if (!text) {
+      reply.status(502).send({ error: 'Empty response from OpenRouter' });
+      return;
+    }
+
+    reply.send({ text });
+  } catch (error) {
+    request.log.error(error);
+    reply.status(500).send({ error: 'Failed to call OpenRouter' });
+  }
+});
+
+
+
+
 fastify.get<ItemGetRequest>('/items/:id', (request, reply) => {
   const itemId = Number(request.params.id);
 
